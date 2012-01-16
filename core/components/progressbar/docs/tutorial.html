@@ -1,0 +1,177 @@
+
+<h3>Progress Bars</h3>
+<p>If you have a process that will take some time to complete, it's nice to give the user something to look at other than a static page. The ProgressBar snippet provides (as you might guess) a progress bar that provides an animated bar, a text message indicating the percent completed, and two other text messages that can be updated as things proceed.</p>
+
+<p>It's possible to implement a progress bar in pure HTML and CSS and/or with PHP. The problem with such bars is that they won't work on certain servers. Browser's don't like to show a page until they receive the end of it, so if you send a series of updates from your program, the user may not see any of them until your entire process has finished. There are a number of tricks you can use to fool the browser into thinking the page is complete. Unfortunately, some servers cache the page until it is complete, so the browser won't see the tricks for quite a while.</p>
+
+<p>The answer is JavaScript, which executes on the site visitor's machine and can update the page at any time. The next question is, how does the JavaScript running in the visitor's browser know how much progress has been made in the process taking place on the server. The answer to that is Ajax (Asynchronous JavaScript and XML). With Ajax, you can send messages back and forth between the client and server and update a page without the page reloading.</p>
+
+<p>The ProgressBar snippet (and accompanying stuff) puts the progress bar on the page and updates it based on information from the server. The demo simulates sending email to a list of users, but the progress bar can be adapted to a variety of tasks like showing progress during a long install of a number of components, copying files, refreshing cache files, or showing the user a progress bar as they complete a survey or series of sequential forms. One thing this progress bar is *not* good for is file uploading, which is a very different process. There are lots of upload progress bars on the web that will work for that.</p>
+
+<h3>How it Works</h3>
+<p>You'll need to understand how the progress bar works in order to implement your own. Unfortunately, there's no way to just stick a progress bar on a page and have it work. You need to integrate the progress bar into the existing PHP code that performs your process. With this package, I've tried to make that as simple as possible.</p>
+
+<p>The diagram below shows the basic operation of the ProgressBar as implemented in the ProgressBarDemo (installed with the package).</p>
+
+<img src="[[++modx_assets_url]]components/progressbar/media/images/pb-flowchart.png" />
+
+<h3>Process Overview</h3>
+<p>Usually, Ajax messages are written to a file, but this package writes them to a MODX chunk instead. It's more secure, and it makes it easier to debug the process.</p>
+
+<p>When the start button is clicked, the JavaScript code requests the PB_Process page, which contains the PB_Process snippet. That snippet (which begins executing when the request for the page comes in) contains the code that performs your process and, as it proceeds, writes progress reports to the PB_Status snippet, which are sent to the user's browser when the PB_Status resource is requested. The PB_Process snippet and the updates to the PB_Status chunk are happening on the server. The data in the PB_Status chunk is a single JSON-formatted string. </p>
+
+<p>The JavaScript (all executing on the client's machine) also starts a loop that repeatedly requests the PB_Status resource and checks to see if anything has changed. If it has, the JavaScript updates the progress bar and the text messages. When the percent hits 100%, the JavaScript stops checking.</p>
+
+
+
+<h3>Process Details</h3>
+<p>Let's look at the process described above in more detail.</p>
+
+<p>The ProgressBarDemo page contains some introductory text, followed by two tags:</p>
+
+<pre><fixedpre>[[$ProgressBar_html]]
+[[!ProgressBar]]</fixedpre></pre>
+
+<p>The first tag is for the ProgressBar_html chunk. It is a Tpl chunk containing the HTML to show the start button, and the progress bar (which is hidden to begin with). If you look at it, you'll see div tags with IDs representing the progress bar itself (pb_progressbar), the text message for the text indicator of the percent (pb_percent), and the two text message areas (pb_text1 and pb_Text2).</p>
+
+<p>The second tag is for the ProgressBar snippet, which first sets some options and makes sure the user is authorized. Then, it gets the JavaScript used for the progress bar from the progress_bar_js chunk. If you look at that chunk, you'll see some placeholders. The ProgressBar snippet will replace those before injecting the JavaScript into the page. This is a great demonstration of how MODX makes it easy to use dynamic JavaScript on your site.</p>
+
+<p>The JavaScript could start executing as soon as the page is rendered in the user's browser, but this is considered impolite and it's often not what you want. That's why we show the start button, with tells the JavaScript to get to work.</p>
+
+<p>When the user clicks the button, the JS code hides the button and shows the progress bar. Then, it fires off an Ajax request for the PB_Process resource.  The PB_Process resource contains nothing but the PB_Process snippet tag (and has an empty template). The JS ignores the return from the page because the only purpose of this Ajax request is to start execution of the PB_Process snippet. This snippet is where you will put the code for your own process.</p>
+
+<p>Immediately after sending the Ajax request for the PB_Process resource, the JavaScript starts a loop that sends an Ajax request about once per second for the PB_Status resource, which contains nothing but the PB_Status chunk tag and also has an empty template.</p>
+
+<p>The PB_Status chunk contains a single JSON-formatted string, which the JS sees when it receives the reply to the page request. The string might look like this if the process is 50% done:</p>
+
+<pre><fixedpre>{"percent":50,"text1":"Group 1","text2":"Bob Ray"}</fixedpre></pre>
+
+<p>The JavaScript will decode that string. It uses the first member (percent) to update both the progress bar and the text "percent done" message. It used the other two strings to print "Group 1" and "BobRay" in the pb_text1 and pb_text2 divs.</p>
+
+<p>when the percent member is 100, (100%) the loop stops and the status is no longer checked. <b>Important</b>: When you implement your own progress bar, always make sure that the percent will reach 100!</p>
+
+<h3>Implementing Your Own Progress Bar</h3>
+        
+<p>Implementing it is not a complex as you might think, as long as you follow these steps carefully: 
+<ol>
+    <li>Create a copy of the ProgressBarDemo resource and add whatever text you like to it (leaving the two tags)</li>
+    <li>Create a copy of the PB_Process resource (with an empty template) and put an uncached snippet tag on the page for your own process snippet.</li>
+    <li>Create a copy of the PB_Status resource and chunk.</li>
+    <li>Change the tag in the resource to point to your chunk.</li>
+    <li>(optional) Change the initial values in the PB_Status chunk.</li>
+    <li>Set the two system settings, pb_process_id and pb_status_id to the IDs of your two resources.</li>
+</ol>
+<p>In your process snippet, you need to update the PB_Status chunk to indicate your progress. This is fairly simple. Just add code like the following that executes during the process:</p>
+
+        <pre><fixedpre>
+    /* Set the $percent, $text1, and $text2 variables here */
+
+    $pb_target = $modx->getObject('modChunk', array('name'=>'PB_Status'));
+    $msg = json_encode(array(
+        'percent' => $percent,
+        'text1' => $text1,
+        'text2' => $text2,
+    ));
+
+    $pb_target->setContent($msg);
+    $pb_target->save();
+        </fixedpre></pre>
+
+<p>Be sure to change the chunk name to the name of your status chunk. If you don't need the text messages, set those variables to an empty string (but be sure to send them or the JavaScript may crash).<p>
+
+<p>You'll also need to duplicate the code at the top of the PB_Process snippet that injects the jQuery code necessary for the progress bar into the page. The code gets the jQuery from the web. You can speed things up and make them more reliable by downloading the files and changing the code to load them from your own machine. You can put them in the assets/components/progress/bar/js/ directory unless you already have copies of them somewhere else. You can hard code the path into the snippet, or use the properties below to set the paths. </p>
+
+<p>When your process is finished and the PB_Status chunk has been updated with the percent at 100, sleep for long enough to be sure that the JS has picked up the 100% and stopped polling (a few seconds is usually enough). Then, update the PB_Status chunk with the settings for the beginning next run (with percent at 0) as is done at the end of the PB_Process snippet for the demo.<p>
+
+<p>Resetting the status chunk at the end of the run is important, because otherwise, on the next run, the JS may get to the status information before your snippet has time to update it and will stop polling before the process starts because it will see 100% there. You'll know if that happens because the progress bar will go to 100% as soon as you click on the start button.</p>
+
+<h3>Authorized Users</h3>
+<p>It may be important that you restrict the use of the progress bar to authorized users. The PB_Process resource has to be published and web-accessible in order to run. That means that it will run when anyone types requests its URL. If, for example, your process snippet sends email to a user group. Miscreants, search engines, and bots, can request that page and all the emails will be sent every time they do so. You'll also want to restrict access if the progress messages contain sensitive information (e.g., user email addresses).<p>
+
+<p>By default, the process is unprotected (the pb_authorized_users system setting is set to 0). If you set it to your own ID (usually 1 for the admin Super User), the snippet will only run when you are logged in or previewing it from the Manager.</p>
+
+<p>The pb_authorized_users property will accept a comma-separated list of user IDs (use no spaces). It can be set in System Settings or sent as a property in the snippet tag. <b>Important</b>: If you put it in the snippet tag, be sure to put it in both the ProgressBar snippet tag and the Process snippet tag.</p>
+
+<h3>Multiple Progress Bars</h3>
+
+<p>If you will have more than one progress bar on the site, the first one can be configured as above, but you'll need a few extra steps for the others.</p>
+
+<p>The two properties, pb_process_id and pb_status_id, are set as System Settings, but you can override them by sending them as properties in the snippet tag. They should point to the resources you create for that particular progress bar.  <b>Important</b>: Be sure to put them in both the ProgressBar snippet tag and the Process snippet tag.  Don't forget to use a different chunk for the status information and use the name of that chunk in the code in your process snippet that updates the chunk. If you need the pb_authorized_users property, you can send it in the snippet tag too to override the System Setting. Again, be sure to put it in both snippet tags.</p>
+
+
+
+<p>Progress Bar Properties</p>
+
+<p>The defaults should work for most systems, but Ajax is very sensitive to timing issues and it's possible that you may have to play with the interval to get it to work. If your process is slow, you may also want to decrease the frequency of the polling to reduce the server load.</p>
+
+<table class="properties">
+    <tbody>
+    <tr>
+        <th>Property</th>
+        <th>Description</th>
+        <th>Default</th>
+    </tr>
+
+    <tr>
+        <td>pb_process_id</td>
+        <td>(required) ID of the process resource (containing the process snippet tag). When sent as a property in the snippet tag, will override the System Setting</td>
+        <td></td>
+    </tr>
+
+    <tr>
+        <td>pb_status_id</td>
+        <td>(required) ID of the status resource (containing the status chunk tag). When sent as a property in the snippet tag, will override the System Setting</td>
+        <td></td>
+    </tr>
+
+    <tr>
+        <td>pb_authorized_users</td>
+        <td>(optional) Comma-separated list of IDs of authorized users</td>
+        <td>0 (everyone is authorized)</td>
+    </tr>
+
+    <tr>
+        <td>pb_set_interval</td>
+        <td>(optional) Time between each poll of the status in milliseconds (1000 = 1 sec.)</td>
+        <td>800</td>
+    </tr>
+
+    <tr>
+        <td>pb_css_url</td>
+        <td>(optional) URL of CSS file for progress bar</td>
+        <td>assets/components/progressbar/css/progressbar.css</td>
+    </tr>
+    <tr>
+        <td>pb_jquery_js_path</td>
+        <td>(optional) Path to main jQuery js file</td>
+        <td>http://code.jquery.com/jquery-latest.js</td>
+    </tr>
+    pb_jquery_ui_css_path
+    <tr>
+        <td>pb_jquery_ui_css_path</td>
+        <td>(optional) Path to jQuery CSS file</td>
+        <td>http://ajax.googleapis.com/ajax/libs/jqueryui/1.7.1/themes/base/jquery-ui.css</td>
+    </tr>
+
+    <tr>
+        <td>pb_jquery_ui_js_path</td>
+        <td>(optional) Path to jQuery UI JS file</td>
+        <td>http://ajax.googleapis.com/ajax/libs/jqueryui/1.7.1/jquery-ui.min.js</td>
+    </tr>
+
+    </tbody>
+</table>
+
+
+<p>Troubleshooting</p>
+<p>Ajax is notoriously hard to debug. If the start button is at the left side of the page, it means that the CSS is not being found.</p>
+
+<p>If the start button does nothing, it usually means that the jQuery files are not being loaded.</p>
+
+<p>If you see the content of your home page or error page in a popup box, it means that the JS can't find the PB_Status resource. The first thing to check is the spelling of all the chunk and snippet names and the two ID settings (pb_process_id and pb_status_id).</p>
+
+<p>You can also view the source of the page and see if all the URLs are correct.</p>
+
+<p>If you see a popup with an unknown error, it usually means that the PB_Status chunk is empty</p>
+
+<p>If you see a popup with a weird JSON string in it, it usually means that the JSON you left in the PB_Status chunk on your last run is malformed.</p>
