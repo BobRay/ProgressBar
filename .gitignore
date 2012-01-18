@@ -20,6 +20,3 @@ modext.js
 # ignore PHP files beginning with test
 test*.php
 
-# ignore serif draw and photo files
-*.Dpp
-*.Spp
