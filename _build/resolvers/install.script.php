@@ -48,12 +48,14 @@ switch($options[xPDOTransport::PACKAGE_ACTION]) {
         $success = true;
         /* Get ID of process resource */
         $settings = array();
-        $settings['pb_status_id'] = '';
-        $settings['pb_process_id'] = '';
+        $settings['pb_status_resource_id'] = '';
+        $settings['pb_status_chunk_id'] = '';
+        $settings['pb_process_resource_id'] = '';
+
         $r = $modx->getObject('modResource', array('alias'=> 'pb-process'));
         if ($r) {
             $processId = $r->get('id');
-            $settings['pb_process_id'] = $r->get('id');
+            $settings['pb_process_resource_id'] = $r->get('id');
         } else {
             $modx->log(xPDO::LOG_LEVEL_INFO,'Could not get PB_Process resource - setting will be set on first run');
         }
@@ -62,11 +64,22 @@ switch($options[xPDOTransport::PACKAGE_ACTION]) {
 
 
         if ($r) {
-            $modx->log(xPDO::LOG_LEVEL_ERROR,'Retrieved PB_Status resource');
+            $modx->log(xPDO::LOG_LEVEL_INFO,'Retrieved PB_Status resource');
             $processId = $r->get('id');
-            $settings['pb_status_id'] = $r->get('id');
+            $settings['pb_status_resource_id'] = $r->get('id');
         } else {
             $modx->log(xPDO::LOG_LEVEL_INFO,'Could not get PB_Status resource - setting will be set on first run');
+        }
+
+        $r = $modx->getObject('modChunk', array('name'=> 'PB_Status'));
+
+
+        if ($r) {
+            $modx->log(xPDO::LOG_LEVEL_INFO,'Retrieved PB_Status chunk');
+            $StatusChunkId = $r->get('id');
+            $settings['pb_status_chunk_id'] = $r->get('id');
+        } else {
+            $modx->log(xPDO::LOG_LEVEL_INFO,'Could not get PB_Status chunk - setting will be set on first run');
         }
 
         /* This section will set any System Settings in the variables at the top of this section. */

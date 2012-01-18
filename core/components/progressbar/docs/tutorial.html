@@ -62,7 +62,7 @@
     <li>Create a copy of the PB_Status resource and chunk</li>
     <li>Change the tag in the new resource to point to your chunk</li>
     <li>(optional) Change the initial values in the PB_Status chunk.</li>
-    <li>Set the two system settings, pb_process_id and pb_status_id to the IDs of your process and status resources.</li>
+    <li>Set the two system settings, pb_process_resource_id and pb_status_resource_id to the IDs of your process and status resources.</li>
     <li>Once things are working, you can modify the ProgressBar resource and the html chunk to meet your needs, but leave the tags and progress bar divs alone</li>
 </ol>
 <p>In your process snippet, you need to update the PB_Status chunk to indicate your progress. This is fairly simple. Just add code like the following that executes during the process:</p>
@@ -107,7 +107,7 @@
 
 <p>If you will have more than one progress bar on the site, the first one can be configured as above, but you'll need a few extra steps for the others.</p>
 
-<p>The two properties, pb_process_id and pb_status_id, are set as System Settings, but you can override them by sending them as properties in the snippet tag. They should point to the resources you create for that particular progress bar.  <b>Important</b>: Be sure to put them in both the ProgressBar snippet tag and the Process snippet tag.  Don't forget to use a different chunk for the status information and use the name of that chunk in the code in your process snippet that updates the chunk. You'll probably also want a different chunk for the page's html and will need to specify that chunk in the chunk tag on the page that shows the progress bar. If you need the pb_authorized_users property, you can send it in the snippet tag too to override the System Setting. Again, be sure to put it in both snippet tags.</p>
+<p>The two properties, pb_process_resource_id and pb_status_resource_id, are set as System Settings, but you can override them by sending them as properties in the snippet tag. They should point to the resources you create for that particular progress bar.  <b>Important</b>: Be sure to put them in both the ProgressBar snippet tag and the Process snippet tag.  Don't forget to use a different chunk for the status information and use the name of that chunk in the code in your process snippet that updates the chunk. You'll probably also want a different chunk for the page's html and will need to specify that chunk in the chunk tag on the page that shows the progress bar. If you need the pb_authorized_users property, you can send it in the snippet tag too to override the System Setting. Again, be sure to put it in both snippet tags.</p>
 
 
 
@@ -124,13 +124,13 @@
     </tr>
 
     <tr>
-        <td>pb_process_id</td>
+        <td>pb_process_resource_id</td>
         <td>(required) ID of the process resource (containing the process snippet tag). When sent as a property in the snippet tag, will override the System Setting</td>
         <td></td>
     </tr>
 
     <tr>
-        <td>pb_status_id</td>
+        <td>pb_status_resource_id</td>
         <td>(required) ID of the status resource (containing the status chunk tag). When sent as a property in the snippet tag, will override the System Setting</td>
         <td></td>
     </tr>
@@ -181,7 +181,7 @@
 
 <p>If the start button does nothing, it usually means that the jQuery files are not being loaded. The URLs could be wrong, or the page might not have a proper template.</p>
 
-<p>If you see the content of your home page or error page in a popup box, it means that the JS can't find the PB_Status resource. The first thing to check is the spelling of all the chunk and snippet names and the two ID settings (pb_process_id and pb_status_id).</p>
+<p>If you see the content of your home page or error page in a popup box, it means that the JS can't find the PB_Status resource. The first thing to check is the spelling of all the chunk and snippet names and the two ID settings (pb_process_resource_id and pb_status_resource_id).</p>
 
 <p>You can also view the source of the page and see if all the URLs are correct.</p>
 

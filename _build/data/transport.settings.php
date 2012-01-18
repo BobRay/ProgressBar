@@ -22,20 +22,29 @@ $settings['pb_authorized_users']->fromArray(array (
     'area' => '',
 ), '', true, true);
 
-$settings['pb_process_id']= $modx->newObject('modSystemSetting');
-$settings['pb_process_id']->fromArray(array (
-    'key' => 'pb_process_id',
+$settings['pb_process_resource_id']= $modx->newObject('modSystemSetting');
+$settings['pb_process_resource_id']->fromArray(array (
+    'key' => 'pb_process_resource_id',
     'value' => '',
-    'xtype' => 'textfield',
+    'xtype' => 'integer',
     'namespace' => 'progressbar',
     'area' => '',
 ), '', true, true);
 
-$settings['pb_status_id']= $modx->newObject('modSystemSetting');
-$settings['pb_status_id']->fromArray(array (
-    'key' => 'pb_status_id',
+$settings['pb_status_resource_id']= $modx->newObject('modSystemSetting');
+$settings['pb_status_resource_id']->fromArray(array (
+    'key' => 'pb_status_resource_id',
     'value' => '',
-    'xtype' => 'textfield',
+    'xtype' => 'integer',
+    'namespace' => 'progressbar',
+    'area' => '',
+), '', true, true);
+
+$settings['pb_status_chunk_id']= $modx->newObject('modSystemSetting');
+$settings['pb_status_chunk_id']->fromArray(array (
+    'key' => 'pb_status_chunk_id',
+    'value' => '',
+    'xtype' => 'integer',
     'namespace' => 'progressbar',
     'area' => '',
 ), '', true, true);
