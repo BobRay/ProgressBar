@@ -33,7 +33,7 @@ $resources[1]->fromArray(array(
     'cacheable' => '0',
     'template' => '1',
     'menutitle' => 'ProgressBarDemo',
-    'hidemenu' => '0',
+    'hidemenu' => '1s',
 ),'',true,true);
 $resources[1]->setContent(file_get_contents($sources['build'] . 'data/resources/progressbardemo.content.html'));
 

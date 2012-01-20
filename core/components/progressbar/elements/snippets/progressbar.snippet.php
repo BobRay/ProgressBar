@@ -98,6 +98,8 @@ if (empty($pb_status_resource_id)) {
     $s->save();
     $pb_status_chunk_id =$r->get('id');
     unset( $r, $s);
+    $cm = $modx->getCacheManager();
+    $cm->refresh();
 }
 if (empty($pb_status_resource_id)) {
     $pb_status_resource_id = $modx->getOption('pb_status_resource_id',$props);
@@ -106,19 +108,19 @@ if (empty($pb_status_resource_id)) {
     }
 }
 
-if (empty($pb_process_resource_id)) {
+
     $pb_process_resource_id = $modx->getOption('pb_process_resource_id', $props);
     if (empty($pb_process_resource_id)) {
         $pb_process_resource_id = $modx->getOption('pb_process_resource_id');
     }
-}
+
 
 /* check for authorized users if pb_authorized_users is set to anything but 0 */
 $authorizedUsers = $modx->getOption('pb_authorized_users',$props);
 if (empty($authorized_users)) {
     $authorized_users = $modx->getOption('pb_authorized_users');
 }
-if ($authorizedUsers != 0) {
+if ($authorizedUsers != '0') {
     $pb_authorizedUsers = explode(',',$authorizedUsers );
         if (! in_array($modx->user->get('id'),$pb_authorizedUsers)) {
             return '<h2>Unauthorized User</h2>';
@@ -130,7 +132,7 @@ if (empty($pb_status_resource_id)) {
 }
 
 /* Make sure pb_status_resource_id points to a real resource */
-$pb_status_url = $modx->makeUrl($pb_status_resource_id,"","","full");
+$pb_status_url = $modx->makeUrl( (integer)$pb_status_resource_id,"","","full");
 if (empty($pb_status_url)) {
     die('pb_status_resource_id is set to a nonexistent resource');
 }
@@ -144,7 +146,7 @@ $pb_interval = $modx->getOption('pb_set_interval', $props);
 $pb_interval = empty($pb_interval)? 800 : $pb_interval;
 
 /* make sure pb_process_resource_id points to a real resource */
-$pb_process_url=$modx->makeUrl($pb_process_resource_id,"","","full");
+$pb_process_url=$modx->makeUrl( (integer) $pb_process_resource_id,"","","full");
 if (empty($pb_process_url)) {
     die('pb_process_resource_id is set to a nonexistent resource');
 }

@@ -26,7 +26,7 @@ $settings['pb_process_resource_id']= $modx->newObject('modSystemSetting');
 $settings['pb_process_resource_id']->fromArray(array (
     'key' => 'pb_process_resource_id',
     'value' => '',
-    'xtype' => 'integer',
+    'xtype' => 'textfield',
     'namespace' => 'progressbar',
     'area' => '',
 ), '', true, true);
@@ -35,7 +35,7 @@ $settings['pb_status_resource_id']= $modx->newObject('modSystemSetting');
 $settings['pb_status_resource_id']->fromArray(array (
     'key' => 'pb_status_resource_id',
     'value' => '',
-    'xtype' => 'integer',
+    'xtype' => 'textfield',
     'namespace' => 'progressbar',
     'area' => '',
 ), '', true, true);
@@ -44,7 +44,7 @@ $settings['pb_status_chunk_id']= $modx->newObject('modSystemSetting');
 $settings['pb_status_chunk_id']->fromArray(array (
     'key' => 'pb_status_chunk_id',
     'value' => '',
-    'xtype' => 'integer',
+    'xtype' => 'textfield',
     'namespace' => 'progressbar',
     'area' => '',
 ), '', true, true);

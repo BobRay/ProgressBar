@@ -46,16 +46,27 @@ switch($options[xPDOTransport::PACKAGE_ACTION]) {
     /* This code will execute during an install */
     case xPDOTransport::ACTION_INSTALL:
         $success = true;
+
         /* Get ID of process resource */
         $settings = array();
         $settings['pb_status_resource_id'] = '';
         $settings['pb_status_chunk_id'] = '';
         $settings['pb_process_resource_id'] = '';
+        $haveSettings = false;
+
+        $r = $modx->getObject('modResource', array('pagetitle'=> 'ProgressBarDemo'));
+        if ($r) {
+            $r->set('template', $modx->getOption('default_template' ));
+            $r->save();
+        } else {
+            $modx->log(xPDO::LOG_LEVEL_ERROR,'Could not set ProgressBarDemo template -- set it manually');
+        }
 
         $r = $modx->getObject('modResource', array('alias'=> 'pb-process'));
         if ($r) {
             $processId = $r->get('id');
             $settings['pb_process_resource_id'] = $r->get('id');
+            $haveSettings = true;
         } else {
             $modx->log(xPDO::LOG_LEVEL_INFO,'Could not get PB_Process resource - setting will be set on first run');
         }
@@ -67,6 +78,7 @@ switch($options[xPDOTransport::PACKAGE_ACTION]) {
             $modx->log(xPDO::LOG_LEVEL_INFO,'Retrieved PB_Status resource');
             $processId = $r->get('id');
             $settings['pb_status_resource_id'] = $r->get('id');
+            $haveSettings = true;
         } else {
             $modx->log(xPDO::LOG_LEVEL_INFO,'Could not get PB_Status resource - setting will be set on first run');
         }
@@ -82,8 +94,8 @@ switch($options[xPDOTransport::PACKAGE_ACTION]) {
             $modx->log(xPDO::LOG_LEVEL_INFO,'Could not get PB_Status chunk - setting will be set on first run');
         }
 
-        /* This section will set any System Settings in the variables at the top of this section. */
-
+        /* Set system settings if we have any */
+        if ($haveSettings) {
             $modx->log(xPDO::LOG_LEVEL_INFO,'Attempting to set System Settings');
             foreach($settings as $key=>$value) {
                 $setting = $modx->getObject('modSystemSetting',array('key'=>$key));
@@ -97,6 +109,7 @@ switch($options[xPDOTransport::PACKAGE_ACTION]) {
                     $modx->log(xPDO::LOG_LEVEL_INFO,'Could not retrieve setting: ' . $key);
                 }
             }
+        }
 
         break;
 
